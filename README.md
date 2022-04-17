@@ -27,6 +27,8 @@ local function NoclipPlayer(Player)
         Character:WaitForChild("Head")
         Character:WaitForChild("Humanoid")
 
+        wait(0.1)
+
         for _, v in pairs(Character:GetDescendants()) do
             if v:IsA("BasePart") then
                 PhysicsService:SetPartCollisionGroup(v, Group)
@@ -38,4 +40,6 @@ end
 for _, Player in pairs(Players:GetPlayers()) do
     NoclipPlayer(Player)
 end
+
+Players.PlayerAdded:Connect(NoclipPlayer)
 ```
