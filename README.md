@@ -23,6 +23,8 @@ local function NoclipPlayer(Player)
     end
 
     Player.CharacterAdded:Connect(function(Character)
+        Character:WaitForChild("HumanoidRootPart")
+        Character:WaitForChild("Head")
         Character:WaitForChild("Humanoid")
 
         for _, v in pairs(Character:GetDescendants()) do
@@ -36,6 +38,4 @@ end
 for _, Player in pairs(Players:GetPlayers()) do
     NoclipPlayer(Player)
 end
-
-Players.PlayerAdded:Connect(NoclipPlayer)
 ```
