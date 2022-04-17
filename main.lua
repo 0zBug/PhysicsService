@@ -14,28 +14,28 @@ local function FindCollisionGroup(CollisionGroup)
     return false
 end
 
-local function EditCollisionGroup(GroupName, arg1, arg2, arg3)
-	local args = {arg1, arg2, arg3}
+local function EditCollisionGroup(GroupName, ...)
+    local args = {...}
 
     local CollisionGroups = string.split(gethiddenproperty(Workspace, "CollisionGroups"), "\\")
 
     local Group = ""
-	for i, CollisionGroup in pairs(CollisionGroups) do
-		local split = CollisionGroup:split("^")
-		if split[1] == GroupName  then
-			for i,v in pairs(args) do
-				if not v then
-					args[i] = split[i]
-				end
-			end
+    for i, CollisionGroup in pairs(CollisionGroups) do
+        local split = CollisionGroup:split("^")
+        if split[1] == GroupName  then
+            for i = 1, 3 do
+                if not args[i] then
+                    args[i] = split[i[]]
+                end
+            end
 
-			Group = Group .. string.format("%s%s^%s^%s", ((i == 1 and "") or "\\"), args[1], args[2], args[3])
-		else	
-			Group = Group .. string.format("%s%s^%s^%s", ((i == 1 and "") or "\\"), split[1], split[2], split[3])
-		end
-	end
+            Group = Group .. string.format("%s%s^%s^%s", ((i == 1 and "") or "\\"), args[1], args[2], args[3])
+        else	
+            Group = Group .. string.format("%s%s^%s^%s", ((i == 1 and "") or "\\"), split[1], split[2], split[3])
+        end
+    end
 
-	sethiddenproperty(Workspace, "CollisionGroups", Group)
+    sethiddenproperty(Workspace, "CollisionGroups", Group)
 end
 
 local namecall
