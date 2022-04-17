@@ -1,4 +1,3 @@
-
 local PhysicsService = game:GetService("PhysicsService")
 local Workspace = game:GetService("Workspace")
 
@@ -25,7 +24,7 @@ local function EditCollisionGroup(GroupName, ...)
         if split[1] == GroupName  then
             for i = 1, 3 do
                 if not args[i] then
-                    args[i] = split[i[]]
+                    args[i] = split[i]
                 end
             end
 
