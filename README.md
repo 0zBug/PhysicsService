@@ -4,8 +4,9 @@ Physics Service for the Client
 ```lua
 local Players = game:GetService("Players")
 local PhysicsService = game:GetService("PhysicsService")
+local HttpService = game:GetService("HttpService")
 
-local Group = "Players-" .. game:GetService("HttpService"):GenerateGUID(false)
+local Group = "Players-" .. HttpService:GenerateGUID(false)
 
 PhysicsService:CreateCollisionGroup(Group)
 PhysicsService:CollisionGroupSetCollidable(Group, Group, false)
