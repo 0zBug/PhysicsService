@@ -5,13 +5,13 @@ local Workspace = game:GetService("Workspace")
 local function FindCollisionGroup(CollisionGroup)
     local CollisionGroups = string.split(gethiddenproperty(Workspace, "CollisionGroups"), "\\")
 
-	for i,v in pairs(CollisionGroups) do
-		if string.split(v, "^")[1] == CollisionGroup then
-			return v
-		end
-	end
+    for i,v in pairs(CollisionGroups) do
+        if string.split(v, "^")[1] == CollisionGroup then
+            return v
+        end
+    end
 
-	return false
+    return false
 end
 
 local function EditCollisionGroup(GroupName, arg1, arg2, arg3)
@@ -40,11 +40,11 @@ end
 
 local namecall
 namecall = hookmetamethod(game, "__namecall" ,newcclosure(function(self,...)
-	if not checkcaller() then return namecall(self, ...) end
-	local args = {...}
+    if not checkcaller() then return namecall(self, ...) end
+    local args = {...}
 
-	if self == PhysicsService then
-		if getnamecallmethod() == "RenameCollisionGroup" then
+    if self == PhysicsService then
+        if getnamecallmethod() == "RenameCollisionGroup" then
             local CollisionGroup, Name = args[1], args[2]
 
             assert(typeof(CollisionGroup) == "string", string.format("Bad argument #1 to '?' (string expected, got %s)", typeof(CollisionGroup)))
@@ -58,20 +58,20 @@ namecall = hookmetamethod(game, "__namecall" ,newcclosure(function(self,...)
                 sethiddenproperty(Workspace, "CollisionGroups", arg1 .. string.format("%s^%s^%s", Name, Split[2], Split[3]) .. arg3)
             end)
 
-			return
-		elseif getnamecallmethod() == "RemoveCollisionGroup"  then
+            return
+        elseif getnamecallmethod() == "RemoveCollisionGroup"  then
             local CollisionGroup = args[1]
 
-			string.gsub(gethiddenproperty(Workspace, "CollisionGroups"), "([%w%p]*)(" .. CollisionGroup .. "%^%d+%^%-%d+)([%w%p]*)", function(arg1, arg2, arg3)
+            string.gsub(gethiddenproperty(Workspace, "CollisionGroups"), "([%w%p]*)(" .. CollisionGroup .. "%^%d+%^%-%d+)([%w%p]*)", function(arg1, arg2, arg3)
                 local CollisionGroups = ""
                 for _, v in pairs(string.split(arg3,"\\")) do
                     CollisionGroups = CollisionGroups .. "\\" .. string.gsub(v, "(%w+%^)(%d+)(%^%-%d+)", function(arg1, arg2, arg3) 
                         return arg1 .. math.floor(tonumber(arg2) - 1) .. arg3 
                     end)
                 end
-                
+
                 if string.sub(CollisionGroups, 1, 1) == "\\" then
-                     CollisionGroups = string.sub(CollisionGroups, 2) 
+                    CollisionGroups = string.sub(CollisionGroups, 2) 
                 end
 
                 CollisionGroups = arg1 .. CollisionGroups
@@ -84,14 +84,14 @@ namecall = hookmetamethod(game, "__namecall" ,newcclosure(function(self,...)
             end)
 
             return
-		elseif getnamecallmethod() == "CreateCollisionGroup" then
+        elseif getnamecallmethod() == "CreateCollisionGroup" then
             local Name = args[1]
 
-			assert(FindCollisionGroup(Name) == false, "Could not create collision group, one with that name already exists.")
+            assert(FindCollisionGroup(Name) == false, "Could not create collision group, one with that name already exists.")
             sethiddenproperty(Workspace, "CollisionGroups", string.format("%s\\%s^%s^%s", gethiddenproperty(Workspace, "CollisionGroups"), Name, tonumber(#PhysicsService:GetCollisionGroups()), "-1"))
-            
+
             return true
-		elseif getnamecallmethod() == "CollisionGroupSetCollidable" then
+        elseif getnamecallmethod() == "CollisionGroupSetCollidable" then
             local Group1, Group2, Collidable = args[1], args[2], args[3]
 
             assert(typeof(Group1) == "string", string.format("Bad argument #1 to '?' (string expected, got %s)", typeof(Group1)))
@@ -123,9 +123,9 @@ namecall = hookmetamethod(game, "__namecall" ,newcclosure(function(self,...)
                 end
             end
 
-			return
-		end
-	end 
+            return
+        end
+    end 
 
-	return namecall(self, ...)
+    return namecall(self, ...)
 end))
