@@ -10,7 +10,7 @@ local Group = "Players-" .. game:GetService("HttpService"):GenerateGUID(false)
 PhysicsService:CreateCollisionGroup(Group)
 PhysicsService:CollisionGroupSetCollidable(Group, Group, false)
 
-local function UnCollidePlayer(Player)
+local function NoclipPlayer(Player)
     local Character = Player.Character
 
     if Character then
@@ -33,8 +33,8 @@ local function UnCollidePlayer(Player)
 end
 
 for _, Player in pairs(Players:GetPlayers()) do
-    UnCollidePlayer(Player)
+    NoclipPlayer(Player)
 end
 
-Players.PlayerAdded:Connect(UnCollidePlayer)
+Players.PlayerAdded:Connect(NoclipPlayer)
 ```
