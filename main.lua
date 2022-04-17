@@ -1,10 +1,11 @@
+
 local PhysicsService = game:GetService("PhysicsService")
 local Workspace = game:GetService("Workspace")
 
 local function FindCollisionGroup(CollisionGroup)
     local CollisionGroups = string.split(gethiddenproperty(Workspace, "CollisionGroups"), "\\")
 
-    for i,v in pairs(CollisionGroups) do
+    for _, v in pairs(CollisionGroups) do
         if string.split(v, "^")[1] == CollisionGroup then
             return v
         end
