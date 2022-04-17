@@ -1,125 +1,131 @@
+
 local PhysicsService = game:GetService("PhysicsService")
 local Workspace = game:GetService("Workspace")
 
-local function doMath(index)
-	return -(2^(index-1))
-end
-
 local function FindCollisionGroup(CollisionGroup)
-	for i,v in pairs(gethiddenproperty(Workspace, "CollisionGroups"):split("\\")) do
-		local split = v:split("^")
-		if split[1] == CollisionGroup then
+    local CollisionGroups = string.split(gethiddenproperty(Workspace, "CollisionGroups"), "\\")
+
+	for i,v in pairs(CollisionGroups) do
+		if string.split(v, "^")[1] == CollisionGroup then
 			return v
 		end
 	end
+
 	return false
 end
 
-local function EditCollisionGroup(Name,arg1,arg2,arg3)
-	local str = ""
-	local args = {arg1,arg2,arg3}
+local function EditCollisionGroup(GroupName, arg1, arg2, arg3)
+	local args = {arg1, arg2, arg3}
 
-	for i,v in pairs(gethiddenproperty(Workspace, "CollisionGroups"):split("\\")) do
-		local split = v:split("^")
-		if split[1] == Name  then
+    local CollisionGroups = string.split(gethiddenproperty(Workspace, "CollisionGroups"), "\\")
+
+    local Group = ""
+	for i, CollisionGroup in pairs(CollisionGroups) do
+		local split = CollisionGroup:split("^")
+		if split[1] == GroupName  then
 			for i,v in pairs(args) do
 				if not v then
 					args[i] = split[i]
 				end
 			end
-			str = str..string.format("%s%s^%s^%s",((i == 1 and "" ) or "\\") ,args[1], args[2], args[3])
+
+			Group = Group .. string.format("%s%s^%s^%s", ((i == 1 and "") or "\\"), args[1], args[2], args[3])
 		else	
-			str = str..string.format("%s%s^%s^%s",((i == 1 and "" ) or "\\") ,split[1], split[2], split[3])
+			Group = Group .. string.format("%s%s^%s^%s", ((i == 1 and "") or "\\"), split[1], split[2], split[3])
 		end
 	end
 
-	sethiddenproperty(Workspace, "CollisionGroups", str)
+	sethiddenproperty(Workspace, "CollisionGroups", Group)
 end
 
-
-local function CreateCollisionGroup(Name)
-	assert(FindCollisionGroup(Name) == false, "Could not create collision group, one with that name already exists.")
-	sethiddenproperty(Workspace, "CollisionGroups", string.format("%s\\%s^%s^%s", gethiddenproperty(Workspace, "CollisionGroups"),Name,tonumber(#PhysicsService:GetCollisionGroups()), "-1" ))
-	return true	
-end
-
-local function CollisionGroupSetCollidable(Name1,Name2,Boolean)
-	assert(typeof(Name1) == "string", string.format("Bad argument #1 to '?' (string expected, got %s)", typeof(Name1)))
-	assert(typeof(Name2) == "string", string.format("Bad argument #2 to '?' (string expected, got %s)", typeof(Name1)))
-	assert(typeof(Boolean) == "boolean", string.format("Bad argument #3 to '?' (boolean expected, got %s)", typeof(Name1)))
-	assert(FindCollisionGroup(Name1) ~= false, "Both collision groups must be valid.")
-	assert(FindCollisionGroup(Name2) ~= false, "Both collision groups must be valid.")
-	local CollisionGroup1 = FindCollisionGroup(Name1)
-	local CollisionGroup2 = FindCollisionGroup(Name2)
-	local split1 = CollisionGroup1:split("^")
-	local split2 = CollisionGroup2:split("^")
-	if Boolean == false then
-		if PhysicsService:CollisionGroupsAreCollidable(Name1, Name2) == true then
-			if Name1 == Name2 then
-				EditCollisionGroup(split1[1], false, false , (tonumber(split1[3])) + doMath(tonumber(split1[2]+1)))
-			elseif Name1 ~= Name2 then
-				EditCollisionGroup(split1[1], false, false , (tonumber(split1[3])) + doMath(tonumber(split2[2]+1)))
-				EditCollisionGroup(split2[1], false, false , (tonumber(split2[3])) + doMath(tonumber(split1[2]+1)))
-			end
-		end
-	elseif Boolean == true then
-		if PhysicsService:CollisionGroupsAreCollidable(Name1, Name2) == false then
-			if Name1 == Name2 then
-				EditCollisionGroup(split1[1], false, false , (tonumber(split1[3])) - doMath(tonumber(split1[2]+1)))
-			elseif Name1 ~= Name2 then
-				EditCollisionGroup(split1[1], false, false , (tonumber(split1[3])) - doMath(tonumber(split2[2]+1)))
-				EditCollisionGroup(split2[1], false, false , (tonumber(split2[3])) - doMath(tonumber(split1[2]+1)))
-			end
-		end
-	end
-end
-
-
-
-local function RemoveCollisionGroup(CollisionGroup)
-	string.gsub(gethiddenproperty(Workspace, "CollisionGroups"),"([%w%p]*)("..CollisionGroup.."%^%d+%^%-%d+)([%w%p]*)",function(arg1,arg2,arg3)
-
-		local new = ""
-		for index, value in pairs(string.split(arg3,"\\")) do
-			new = new.."\\"..string.gsub(value,"(%w+%^)(%d+)(%^%-%d+)",function(arg1,arg2,arg3)  return arg1..math.floor(tonumber(arg2)-1)..arg3 end)
-
-		end
-		if new:sub(1,1) == "\\" then  new = new:sub(2,new:len()) end
-		local toReturn = arg1..new
-		if toReturn:sub(toReturn:len(),toReturn:len()) == "\\" then toReturn = toReturn:sub(1,toReturn:len()-1) end
-
-		sethiddenproperty(Workspace, "CollisionGroups", toReturn)
-	end)
-end
-
-local function RenameCollisionGroup(CollisionGroup,newName)
-	assert(typeof(CollisionGroup) == "string", string.format("Bad argument #1 to '?' (string expected, got %s)", typeof(CollisionGroup)))
-	assert(typeof(newName) == "string", string.format("Bad argument #1 to '?' (string expected, got %s)", typeof(newName)))
-	assert(FindCollisionGroup(CollisionGroup) ~= false, "Cannot find the collision group")
-	assert(FindCollisionGroup(newName) == false, "This collision group already exists!")
-	string.gsub(gethiddenproperty(Workspace, "CollisionGroups"),"([%w%p]*)("..CollisionGroup.."%^%d+%^%-%d+)([%w%p]*)",function(arg1,arg2,arg3)
-		local split = FindCollisionGroup(CollisionGroup):split("^")
-		local str = newName.."^"..split[2].."^"..split[3]
-		sethiddenproperty(Workspace, "CollisionGroups", arg1..str..arg3)
-	end)
-end
-
-local old
-old = hookmetamethod(game, "__namecall" ,newcclosure(function(self,...)
-	if not checkcaller() then return old(self,...) end
+local namecall
+namecall = hookmetamethod(game, "__namecall" ,newcclosure(function(self,...)
+	if not checkcaller() then return namecall(self, ...) end
 	local args = {...}
 
 	if self == PhysicsService then
 		if getnamecallmethod() == "RenameCollisionGroup" then
-			return	RenameCollisionGroup(args[1],args[2])
+            local CollisionGroup, Name = args[1], args[2]
+
+            assert(typeof(CollisionGroup) == "string", string.format("Bad argument #1 to '?' (string expected, got %s)", typeof(CollisionGroup)))
+            assert(typeof(Name) == "string", string.format("Bad argument #2 to '?' (string expected, got %s)", typeof(Name)))
+            assert(FindCollisionGroup(CollisionGroup) ~= false, "Cannot find the collision group")
+            assert(FindCollisionGroup(Name) == false, "This collision group already exists!")
+
+            string.gsub(gethiddenproperty(Workspace, "CollisionGroups"), "([%w%p]*)(" .. CollisionGroup .. "%^%d+%^%-%d+)([%w%p]*)", function(arg1, arg2, arg3)
+                local Split = string.split(FindCollisionGroup(CollisionGroup), "^")
+
+                sethiddenproperty(Workspace, "CollisionGroups", arg1 .. string.format("%s^%s^%s", Name, Split[2], Split[3]) .. arg3)
+            end)
+
+			return
 		elseif getnamecallmethod() == "RemoveCollisionGroup"  then
-			return	RemoveCollisionGroup(args[1])
+            local CollisionGroup = args[1]
+
+			string.gsub(gethiddenproperty(Workspace, "CollisionGroups"), "([%w%p]*)(" .. CollisionGroup .. "%^%d+%^%-%d+)([%w%p]*)", function(arg1, arg2, arg3)
+                local CollisionGroups = ""
+                for _, v in pairs(string.split(arg3,"\\")) do
+                    CollisionGroups = CollisionGroups .. "\\" .. string.gsub(v, "(%w+%^)(%d+)(%^%-%d+)", function(arg1, arg2, arg3) 
+                        return arg1 .. math.floor(tonumber(arg2) - 1) .. arg3 
+                    end)
+                end
+                
+                if string.sub(CollisionGroups, 1, 1) == "\\" then
+                     CollisionGroups = string.sub(CollisionGroups, 2) 
+                end
+
+                CollisionGroups = arg1 .. CollisionGroups
+
+                if string.sub(#CollisionGroups, #CollisionGroups) == "\\" then
+                    CollisionGroups = string.sub(CollisionGroups, 1, #CollisionGroups - 1)
+                end
+
+                sethiddenproperty(Workspace, "CollisionGroups", CollisionGroups)
+            end)
+
+            return
 		elseif getnamecallmethod() == "CreateCollisionGroup" then
-			return	CreateCollisionGroup(args[1])
+            local Name = args[1]
+
+			assert(FindCollisionGroup(Name) == false, "Could not create collision group, one with that name already exists.")
+            sethiddenproperty(Workspace, "CollisionGroups", string.format("%s\\%s^%s^%s", gethiddenproperty(Workspace, "CollisionGroups"), Name, tonumber(#PhysicsService:GetCollisionGroups()), "-1"))
+            
+            return true
 		elseif getnamecallmethod() == "CollisionGroupSetCollidable" then
-			return CollisionGroupSetCollidable(args[1],args[2],args[3])
+            local Group1, Group2, Collidable = args[1], args[2], args[3]
+
+            assert(typeof(Group1) == "string", string.format("Bad argument #1 to '?' (string expected, got %s)", typeof(Group1)))
+            assert(typeof(Group2) == "string", string.format("Bad argument #2 to '?' (string expected, got %s)", typeof(Group2)))
+            assert(typeof(Collidable) == "boolean", string.format("Bad argument #3 to '?' (boolean expected, got %s)", typeof(Collidable)))
+            assert(FindCollisionGroup(Group1) ~= false, "Both collision groups must be valid.")
+            assert(FindCollisionGroup(Group2) ~= false, "Both collision groups must be valid.")
+
+            local CollisionGroup1 = string.split(FindCollisionGroup(Group1), "^")
+            local CollisionGroup2 = string.split(FindCollisionGroup(Group2), "^")
+
+            if Collidable == false then
+                if PhysicsService:CollisionGroupsAreCollidable(Group1, Group2) == true then
+                    if Group1 == Group2 then
+                        EditCollisionGroup(CollisionGroup1[1], false, false, (tonumber(CollisionGroup1[3])) - (2 ^ (tonumber(CollisionGroup1[2]))))
+                    elseif Group1 ~= Group2 then
+                        EditCollisionGroup(CollisionGroup1[1], false, false, (tonumber(CollisionGroup1[3])) - (2 ^ (tonumber(CollisionGroup2[2]))))
+                        EditCollisionGroup(CollisionGroup2[1], false, false, (tonumber(CollisionGroup2[3])) - (2 ^ (tonumber(CollisionGroup1[2]))))
+                    end
+                end
+            elseif Collidable == true then
+                if PhysicsService:CollisionGroupsAreCollidable(Group1, Group2) == false then
+                    if Group1 == Group2 then
+                        EditCollisionGroup(CollisionGroup1[1], false, false, (tonumber(CollisionGroup1[3])) + (2 ^ (tonumber(CollisionGroup1[2]))))
+                    elseif Group1 ~= Group2 then
+                        EditCollisionGroup(CollisionGroup1[1], false, false, (tonumber(CollisionGroup1[3])) + (2 ^ (tonumber(CollisionGroup2[2]))))
+                        EditCollisionGroup(CollisionGroup2[1], false, false, (tonumber(CollisionGroup2[3])) + (2 ^ (tonumber(CollisionGroup1[2]))))
+                    end
+                end
+            end
+
+			return
 		end
 	end 
 
-	return old(self,...)
+	return namecall(self, ...)
 end))
