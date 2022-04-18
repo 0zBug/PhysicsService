@@ -39,7 +39,7 @@ local function EditCollisionGroup(GroupName, ...)
 end
 
 local namecall
-namecall = hookmetamethod(game, "__namecall" ,newcclosure(function(self,...)
+namecall = hookmetamethod(game, "__namecall", newcclosure(function(self,...)
     if not checkcaller() then return namecall(self, ...) end
     local args = {...}
 
